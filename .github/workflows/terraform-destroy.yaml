@@ -1,0 +1,35 @@
+name: Terraform Destroy
+
+on:
+  - workflow_dispatch
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-central-1
+
+jobs:
+  terraform:
+    name: Terraform Destroy
+    runs-on: [ubuntu-latest]
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: anibrinja/provision-eks-cluster-terraform
+          
+      - name: Checking versions
+        run: |
+          terraform -v
+      - name: Identity
+        run: |
+          aws sts get-caller-identity
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform output module
+        run: terraform plan -destroy -var-file="testing.tfvars"
+      - name: Terraform destroy module
+        run: terraform destroy --auto-approve -var-file="testing.tfvars"
